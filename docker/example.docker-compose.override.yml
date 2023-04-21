@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  cpp:
+    build:
+      args:
+        USER_ID: 1000
+        GROUP_ID: 1000
+    restart: always
+    environment:
+      - RANK_COIN_KEEPER_TELEGRAM_BOT_TOKEN_API="token_bot"

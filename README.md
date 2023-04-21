@@ -3,6 +3,22 @@ Managing ratings, rewards and penalties in telegram chat rooms!
 
 ## Ссылки
 * Работающий телеграм бот на основе данного кода - https://t.me/RankCoinKeeperBot
+* Для контрибьютинга - https://github.com/FromSi/RankCoinKeeper/blob/master/CONTRIBUTING.md
+
+## Установка
+> Описание для GNU/Linux дистрибутивов имеющих [apt](https://salsa.debian.org/apt-team/apt). Например: Debian, Mint, Ubuntu etc.
+> Запуск без докера описано в файле [CONTRIBUTING.md](https://github.com/FromSi/RankCoinKeeper/blob/master/CONTRIBUTING.md).
+
+Выполнить команды:
+```
+sudo apt update && sudo apt install git make
+make docker_install
+sudo rm -rf /var/lib/apt/lists/*
+```
+
+Нужно редактировать необходимые данные в файле `./docker/docker-compose.override.yml` и CRON время в файле `./docker/cpp/crontab`.
+
+Для запуска `make docker_run` и для остановки `make docker_stop`.
 
 # Что в планах сделать
 Если есть текст ниже, значить еще есть первоначальные идеи для создания (значить бот пока не достиг MVP).
