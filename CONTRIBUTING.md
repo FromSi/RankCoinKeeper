@@ -35,7 +35,7 @@ File | Settings | Build, Execution, Deployment | CMake
 В конфигурации запуска нужно указать ENV системы и аргументы программы. А так же рабочую директорию.
 
 <p align="center">
-  <img src="https://github.com/FromSi/RankCoinKeeper/blob/master/screenshots/run_config.jpg" height="400"/>
+  <img src="https://github.com/FromSi/RankCoinKeeper/blob/master/screenshots/run_config.png" height="400"/>
 </p>
 
 ## Запуск
