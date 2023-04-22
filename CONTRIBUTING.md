@@ -1,5 +1,5 @@
 # Contributing
-Описание для GNU/Linux дистрибутивов имеющих [apt](https://salsa.debian.org/apt-team/apt). Например: Debian, Mint, Ubuntu etc. 
+Описание для GNU/Linux дистрибутивов имеющих [apt](https://salsa.debian.org/apt-team/apt). Например: Debian, Mint, Ubuntu, etc. 
 
 ## Установка
 > Нужен [docker](https://docs.docker.com/get-started/) без использования [sudo](https://github.com/sudo-project/sudo).
@@ -30,7 +30,13 @@ File | Settings | Build, Execution, Deployment | CMake
 
 В `Build directory` введи директорию `cmake`. 
 
-Зайди в файл CMakeLists.txt и загрузи его для IDE. В конфигурации запуска нужно проставить ENV системы и аргументы программы.
+Зайди в файл CMakeLists.txt и загрузи его для IDE. 
+
+В конфигурации запуска нужно указать ENV системы и аргументы программы. А так же рабочую директорию.
+
+<p align="center">
+  <img src="https://github.com/FromSi/RankCoinKeeper/blob/master/screenshots/run_config.jpg" height="400"/>
+</p>
 
 ## Запуск
 * Либо запускать через IDE 
@@ -39,3 +45,4 @@ File | Settings | Build, Execution, Deployment | CMake
 ## Все кейсы запуска программы
 * `make dev_build && ./cmake/app` - запуск без аргументов (вызовется -h --help)
 * `make dev_build && ./cmake/app -h` или `--help` - справочная информация по проекту
+* `make dev_build && ./cmake/app -u` или `--updates` - обработка новых сообщений

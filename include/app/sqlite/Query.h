@@ -273,6 +273,7 @@ namespace app {
         int responseCode = sqlite3_prepare_v2(this->db, sql.c_str(), -1, &stmt, nullptr);
 
         if (responseCode != SQLITE_OK) {
+            std::cerr << "Error in sqlite3_prepare_v2: " << sqlite3_errmsg(this->db) << std::endl;
             sqlite3_finalize(stmt);
 
             return false;
