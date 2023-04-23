@@ -18,11 +18,6 @@ namespace app {
 
     public:
         /**
-         * @brief Название таблицы для модели
-         */
-        inline static const std::string TABLE_NAME = "chats";
-
-        /**
          * @brief Список полей из таблицы
          */
         enum Fields {
@@ -38,15 +33,7 @@ namespace app {
             FIELD_IS_ADMIN,
         };
 
-        /**
-         * @brief Конструктор по умолчанию. Полезен при простом создании модели
-         */
-        explicit ChatModel() : Model() { }
-
-        /**
-         * @brief Деструктор по умолчанию
-         */
-        ~ChatModel() = default;
+        std::string getTableName() const override;
 
         /**
          * @return

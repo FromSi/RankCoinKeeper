@@ -58,7 +58,7 @@ namespace app {
                 return "";
             }
 
-            sql << "INSERT OR REPLACE INTO " << T::TABLE_NAME << "(";
+            sql << "INSERT OR REPLACE INTO " << model->getTableName() << "(";
 
             {
                 size_t i = 0;

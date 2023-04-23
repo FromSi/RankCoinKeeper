@@ -29,6 +29,11 @@ namespace app {
         ~Model() = default;
 
         /**
+         * @brief Название таблицы для модели
+         */
+        virtual std::string getTableName() const = 0;
+
+        /**
          * @brief Список полей таблицы
          * @return
          */
