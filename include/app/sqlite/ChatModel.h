@@ -1,7 +1,7 @@
 #ifndef APP_CHATMODEL_H
 #define APP_CHATMODEL_H
 
-#include "app/sqlite/Model.h"
+#include "Model.h"
 
 #include <string>
 #include <sstream>
@@ -14,33 +14,7 @@ namespace app {
     /**
      * @brief Модель таблицы chats
      */
-    class ChatModel : public Model {
-
-    private:
-        /**
-         * @brief ID телеграм чата
-         */
-        int64_t chatId = 0;
-
-        /**
-         * @brief Название чата
-         */
-        std::string name;
-
-        /**
-         * @brief Username чата
-         */
-        std::string username;
-
-        /**
-         * @brief Активность в чате
-         */
-        int isActive = 0;
-
-        /**
-         * @brief Права администратора
-         */
-        int isAdmin = 0;
+    class ChatModel : public Model<ChatModel> {
 
     public:
         /**
@@ -49,14 +23,20 @@ namespace app {
         inline static const std::string TABLE_NAME = "chats";
 
         /**
-         * @brief Название полей
+         * @brief Список полей из таблицы
          */
-        inline static const std::string
-            FIELD_CHAT_ID = TABLE_NAME + ".chat_id",
-            FIELD_NAME = TABLE_NAME + ".name",
-            FIELD_USERNAME = TABLE_NAME + ".username",
-            FIELD_IS_ACTIVE = TABLE_NAME + ".is_active",
-            FIELD_IS_ADMIN = TABLE_NAME + ".is_admin";
+        enum Fields {
+            /** @brief ID телеграм чата */
+            FIELD_CHAT_ID,
+            /** @brief Название чата */
+            FIELD_NAME,
+            /** @brief Username чата */
+            FIELD_USERNAME,
+            /** @brief Активность в чате */
+            FIELD_IS_ACTIVE,
+            /** @brief Права администратора */
+            FIELD_IS_ADMIN,
+        };
 
         /**
          * @brief Конструктор по умолчанию. Полезен при простом создании модели
@@ -64,60 +44,14 @@ namespace app {
         explicit ChatModel() : Model() { }
 
         /**
-         * @brief Конструктор для настройки сериализации с БД. Полезен для SELECT запросов
-         */
-        explicit ChatModel(sqlite3_stmt* stmt, const std::vector<std::string>& select);
-
-        /**
-         * @brief Конструктор для заполнение полей. Полезен для INSERT запросов
-         */
-        explicit ChatModel(const int64_t& chatId, const std::string& name, const std::string& username,
-                           const int& isActive, const int& isAdmin);
-
-        /**
          * @brief Деструктор по умолчанию
          */
         ~ChatModel() = default;
 
         /**
-         * @brief Getter для переменной chatId
          * @return
          */
-        int64_t& getChatId();
-
-        /**
-         * @brief Getter для переменной name
-         * @return
-         */
-        std::string& getName();
-
-        /**
-         * @brief Getter для переменной username
-         * @return
-         */
-        std::string& getUsername();
-
-        /**
-         * @brief Getter для переменной isActive
-         * @return
-         */
-        int& getIsActive();
-
-        /**
-         * @brief Getter для переменной isAdmin
-         * @return
-         */
-        int& getIsAdmin();
-
-        /**
-         * @return
-         */
-        std::string insertSql() override;
-
-        /**
-         * @return
-         */
-        void insertBind(sqlite3_stmt* stmt) override;
+        std::map<int, std::string>& getFields() override;
 
     };
 

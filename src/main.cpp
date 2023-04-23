@@ -80,11 +80,9 @@ void handlerUpdates() {
 
         int64_t chatId = message->chat->id;
 
-        std::string chatName = (!message->chat->title.empty())
-                               ? message->chat->title : "empty";
+        std::string chatName = (!message->chat->title.empty()) ? message->chat->title : "empty";
 
-        std::string chatUsername = (!message->chat->username.empty())
-                                   ? message->chat->username : "empty";
+        std::string chatUsername = (!message->chat->username.empty()) ? message->chat->username : "empty";
 
         bool isActive = message->newChatMember->status != TgBot::ChatMemberLeft::STATUS
                 && message->newChatMember->status != TgBot::ChatMemberBanned::STATUS;
@@ -92,10 +90,15 @@ void handlerUpdates() {
         bool isAdmin = message->newChatMember->status == TgBot::ChatMemberAdministrator::STATUS
                 && dynamic_cast<TgBot::ChatMemberAdministrator*>(message->newChatMember.get())->canRestrictMembers;
 
-        app::Query<app::ChatModel> queryChatModel;
-        app::ChatModel chatModel(chatId, chatName, chatUsername, isActive, isAdmin);
+        app::ChatModel chatModel;
 
-        queryChatModel.insert(chatModel);
+        chatModel.createOrUpdate({
+                                         {app::ChatModel::FIELD_CHAT_ID,   chatId},
+                                         {app::ChatModel::FIELD_NAME,      chatName},
+                                         {app::ChatModel::FIELD_USERNAME,  chatUsername},
+                                         {app::ChatModel::FIELD_IS_ACTIVE, isActive},
+                                         {app::ChatModel::FIELD_IS_ADMIN,  isAdmin},
+                                 });
     });
 
     while (true) {
