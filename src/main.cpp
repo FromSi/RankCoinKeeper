@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <map>
 #include "tgbot/tgbot.h"
 #include "app/app.h"
 
@@ -93,12 +92,12 @@ void handlerUpdates() {
         app::ChatModel chatModel;
 
         chatModel.createOrUpdate({
-                                         {app::ChatModel::FIELD_CHAT_ID,   chatId},
-                                         {app::ChatModel::FIELD_NAME,      chatName},
-                                         {app::ChatModel::FIELD_USERNAME,  chatUsername},
-                                         {app::ChatModel::FIELD_IS_ACTIVE, isActive},
-                                         {app::ChatModel::FIELD_IS_ADMIN,  isAdmin},
-                                 });
+            {app::ChatModel::FIELD_CHAT_ID, chatId},
+            {app::ChatModel::FIELD_NAME, chatName},
+            {app::ChatModel::FIELD_USERNAME, chatUsername},
+            {app::ChatModel::FIELD_IS_ACTIVE, isActive},
+            {app::ChatModel::FIELD_IS_ADMIN, isAdmin},
+        });
     });
 
     while (true) {
