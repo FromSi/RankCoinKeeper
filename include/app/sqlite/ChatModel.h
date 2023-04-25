@@ -33,6 +33,9 @@ namespace app {
             FIELD_IS_ADMIN,
         };
 
+        /**
+         * @return
+         */
         std::string getTableName() const override;
 
         /**

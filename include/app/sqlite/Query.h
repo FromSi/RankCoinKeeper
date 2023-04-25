@@ -41,13 +41,125 @@ namespace app {
          * @param fields
          * @return
          */
-        bool upsert(Model<T>* model, const std::map<int, std::variant<int, int64_t, std::string>>& fields);
+        bool upsert(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& fields);
 
+        std::vector<std::map<int, std::variant<int64_t, std::string>>> select(
+                Model<T>* model,
+                const std::vector<int>& select,
+                const std::string& where,
+                const std::string& leftJoinForWhere,
+                const std::string& orderBy,
+                const int& limit,
+                const int& offset);
     };
 
     template<class T>
-    bool Query<T>::upsert(Model<T>* model, const std::map<int, std::variant<int, int64_t, std::string>>& fields) {
+    std::vector<std::map<int, std::variant<int64_t, std::string>>> Query<T>::select(
+            Model<T>* model,
+            const std::vector<int>& select,
+            const std::string& where,
+            const std::string& leftJoinForWhere,
+            const std::string& orderBy,
+            const int& limit,
+            const int& offset) {
+        std::vector<T> result;
+
+        if (!this->isConnection) {
+            return result;
+        }
+
+        std::stringstream sql;
+
+        {
+            sql << "SELECT ";
+
+            if (select.empty()) {
+                sql << T::TABLE_NAME << ".* ";
+            } else {
+                for (size_t i = 0; i < select.size(); i++) {
+                    sql << model->getFieldName(select[i]);
+
+                    if (i != select.size() - 1) {
+                        sql << ",";
+                    }
+                }
+
+                sql << " ";
+            }
+
+            sql << "FROM " << T::TABLE_NAME << " ";
+
+            if (!leftJoinForWhere.empty()) {
+                sql << leftJoinForWhere << " ";
+            }
+
+            if (!where.empty()) {
+                sql << "WHERE " << where << " ";
+            }
+
+            if (!orderBy.empty()) {
+                sql << "ORDER BY " << orderBy << " ";
+            }
+
+            if (limit > 0) {
+                sql << "LIMIT " << limit << " ";
+            }
+
+            if (offset > 0) {
+                sql << "OFFSET " << offset << " ";
+            }
+
+            sql << ";";
+        }
+
         sqlite3_stmt *stmt;
+
+        int responseCode = sqlite3_prepare_v2(this->db, sql.str().c_str(), -1, &stmt, nullptr);
+
+        if (responseCode != SQLITE_OK) {
+            std::cerr << "Error in sqlite3_prepare_v2: " << sqlite3_errmsg(this->db) << std::endl;
+
+            sqlite3_finalize(stmt);
+
+            return result;
+        }
+
+        {
+            while (sqlite3_step(stmt) == SQLITE_ROW) {
+                std::map<int, std::variant<int64_t, std::string>> item;
+
+                int numSelectColumns = sqlite3_column_count(stmt);
+
+                for (int i = 0; i < numSelectColumns; ++i) {
+                    int typeSelectColumn = sqlite3_column_type(stmt, i);
+                    int fieldId = model->getFieldId(reinterpret_cast<const char*>(sqlite3_column_name(stmt, i)));
+
+                    switch (typeSelectColumn) {
+                        case SQLITE_INTEGER:
+                            item[fieldId] = sqlite3_column_int64(stmt, i);
+                            break;
+                        case SQLITE_TEXT:
+                            item[fieldId] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, i));
+                            break;
+                        default:
+                            item[fieldId] = "NULL";
+                    }
+                }
+
+                result.push_back(item);
+            }
+
+            sqlite3_finalize(stmt);
+        }
+
+        return result;
+    }
+
+    template<class T>
+    bool Query<T>::upsert(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& fields) {
+        if (!this->isConnection) {
+            return false;
+        }
 
         std::stringstream sql;
 
@@ -55,7 +167,7 @@ namespace app {
             size_t count = fields.size();
 
             if (count == 0) {
-                return "";
+                return false;
             }
 
             sql << "INSERT OR REPLACE INTO " << model->getTableName() << "(";
@@ -87,10 +199,13 @@ namespace app {
             sql << ");";
         }
 
+        sqlite3_stmt *stmt;
+
         int responseCode = sqlite3_prepare_v2(this->db, sql.str().c_str(), -1, &stmt, nullptr);
 
         if (responseCode != SQLITE_OK) {
             std::cerr << "Error in sqlite3_prepare_v2: " << sqlite3_errmsg(this->db) << std::endl;
+
             sqlite3_finalize(stmt);
 
             return false;

@@ -40,11 +40,18 @@ namespace app {
         virtual std::map<int, std::string>& getFields() = 0;
 
         /**
+         * @brief Получить id поля
+         * @param field
+         * @return
+         */
+        int getFieldId(std::string fieldName);
+
+        /**
          * @brief Получить название поля
          * @param field
          * @return
          */
-        std::string getFieldName(int field);
+        std::string getFieldName(int fieldId);
 
         /**
          * @brief Создание или обновление данных
@@ -52,7 +59,7 @@ namespace app {
          * @param fields
          * @return
          */
-        bool createOrUpdate(const std::map<int, std::variant<int, int64_t, std::string>>& fields);
+        bool createOrUpdate(const std::map<int, std::variant<int64_t, std::string>>& fields);
 
     protected:
         /**
@@ -63,14 +70,27 @@ namespace app {
     };
 
     template<class T>
-    bool Model<T>::createOrUpdate(const std::map<int, std::variant<int, int64_t, std::string>>& fields) {
+    bool Model<T>::createOrUpdate(const std::map<int, std::variant<int64_t, std::string>>& fields) {
         return this->query.upsert(this, fields);
     }
 
     template<class T>
-    std::string Model<T>::getFieldName(int field) {
+    int Model<T>::getFieldId(std::string fieldName) {
         const std::map<int, std::string>& fields = getFields();
-        auto it = fields.find(field);
+
+        for (const auto& field : fields) {
+            if (field.second == fieldName) {
+                return field.first;
+            }
+        }
+
+        return -1;
+    }
+
+    template<class T>
+    std::string Model<T>::getFieldName(int fieldId) {
+        const std::map<int, std::string>& fields = getFields();
+        auto it = fields.find(fieldId);
 
         if (it != fields.end()) {
             return it->second;
