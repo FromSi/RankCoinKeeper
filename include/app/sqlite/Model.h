@@ -54,6 +54,17 @@ namespace app {
         std::string getFieldName(int fieldId);
 
         /**
+         * @brief Получить данные
+         *
+         * @param select
+         * @param statementKeys
+         * @return
+         */
+        std::vector<std::map<int, std::variant<int64_t, std::string>>> all(
+                const std::vector<int>& select,
+                const std::map<int, std::string>& statementKeys);
+
+        /**
          * @brief Создание или обновление данных
          * @param model
          * @param fields
@@ -68,6 +79,13 @@ namespace app {
         Query<T> query;
 
     };
+
+    template<class T>
+    std::vector<std::map<int, std::variant<int64_t, std::string>>> Model<T>::all(
+            const std::vector<int>& select,
+            const std::map<int, std::string>& statementKeys) {
+        return this->query.select(this, select, statementKeys);
+    }
 
     template<class T>
     bool Model<T>::createOrUpdate(const std::map<int, std::variant<int64_t, std::string>>& fields) {

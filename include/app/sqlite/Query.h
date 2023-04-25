@@ -25,6 +25,17 @@ namespace app {
 
     public:
         /**
+         * @brief Ключи конструкций для составления запросов
+         */
+        enum StatementKeys {
+            WHERE,
+            LEFT_JOIN_FOR_WHERE,
+            ORDER_BY,
+            LIMIT,
+            OFFSET,
+        };
+
+        /**
          * @brief Конструктор по умолчанию
          * @param dbName
          */
@@ -36,32 +47,32 @@ namespace app {
         ~Query() = default;
 
         /**
-         * @brief Составление или обновление данных
+         * @brief Создание или обновление данных
          * @param model
          * @param fields
          * @return
          */
         bool upsert(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& fields);
 
+        /**
+         * @brief Получить данные
+         *
+         * @param model
+         * @param select
+         * @param statementKeys
+         * @return
+         */
         std::vector<std::map<int, std::variant<int64_t, std::string>>> select(
                 Model<T>* model,
                 const std::vector<int>& select,
-                const std::string& where,
-                const std::string& leftJoinForWhere,
-                const std::string& orderBy,
-                const int& limit,
-                const int& offset);
+                const std::map<int, std::string>& statementKeys);
     };
 
     template<class T>
     std::vector<std::map<int, std::variant<int64_t, std::string>>> Query<T>::select(
             Model<T>* model,
             const std::vector<int>& select,
-            const std::string& where,
-            const std::string& leftJoinForWhere,
-            const std::string& orderBy,
-            const int& limit,
-            const int& offset) {
+            const std::map<int, std::string>& statementKeys) {
         std::vector<T> result;
 
         if (!this->isConnection) {
@@ -89,24 +100,24 @@ namespace app {
 
             sql << "FROM " << T::TABLE_NAME << " ";
 
-            if (!leftJoinForWhere.empty()) {
-                sql << leftJoinForWhere << " ";
+            if (statementKeys.find(LEFT_JOIN_FOR_WHERE) != statementKeys.end()) {
+                sql << statementKeys[LEFT_JOIN_FOR_WHERE] << " ";
             }
 
-            if (!where.empty()) {
-                sql << "WHERE " << where << " ";
+            if (statementKeys.find(WHERE) != statementKeys.end()) {
+                sql << "WHERE " << statementKeys[WHERE] << " ";
             }
 
-            if (!orderBy.empty()) {
-                sql << "ORDER BY " << orderBy << " ";
+            if (statementKeys.find(ORDER_BY) != statementKeys.end()) {
+                sql << "ORDER BY " << statementKeys[ORDER_BY] << " ";
             }
 
-            if (limit > 0) {
-                sql << "LIMIT " << limit << " ";
+            if (statementKeys.find(LIMIT) != statementKeys.end()) {
+                sql << "LIMIT " << statementKeys[LIMIT] << " ";
             }
 
-            if (offset > 0) {
-                sql << "OFFSET " << offset << " ";
+            if (statementKeys.find(OFFSET) != statementKeys.end()) {
+                sql << "OFFSET " << statementKeys[OFFSET] << " ";
             }
 
             sql << ";";
