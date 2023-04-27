@@ -13,6 +13,7 @@ namespace app {
             {ChatModel::Fields::FIELD_USERNAME, "username"},
             {ChatModel::Fields::FIELD_IS_ACTIVE, "is_active"},
             {ChatModel::Fields::FIELD_IS_ADMIN, "is_admin"},
+            {ChatModel::Fields::FIELD_MEMBER_COUNT, "member_count"},
         };
 
         return fields;

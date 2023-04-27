@@ -31,6 +31,8 @@ namespace app {
             FIELD_IS_ACTIVE,
             /** @brief Права администратора */
             FIELD_IS_ADMIN,
+            /** @brief Количество участников */
+            FIELD_MEMBER_COUNT,
         };
 
         /**

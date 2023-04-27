@@ -33,6 +33,7 @@ namespace app {
             ORDER_BY,
             LIMIT,
             OFFSET,
+            SET,
         };
 
         /**
@@ -55,6 +56,15 @@ namespace app {
         bool upsert(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& fields);
 
         /**
+         * @brief Обновление данных
+         * @param model
+         * @param set
+         * @param where
+         * @return
+         */
+        bool update(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& set, const std::string& where);
+
+        /**
          * @brief Получить данные
          *
          * @param model
@@ -73,7 +83,7 @@ namespace app {
             Model<T>* model,
             const std::vector<int>& select,
             const std::map<int, std::string>& statementKeys) {
-        std::vector<T> result;
+        std::vector<std::map<int, std::variant<int64_t, std::string>>> result;
 
         if (!this->isConnection) {
             return result;
@@ -85,7 +95,7 @@ namespace app {
             sql << "SELECT ";
 
             if (select.empty()) {
-                sql << T::TABLE_NAME << ".* ";
+                sql << model->getTableName() << ".* ";
             } else {
                 for (size_t i = 0; i < select.size(); i++) {
                     sql << model->getFieldName(select[i]);
@@ -98,26 +108,26 @@ namespace app {
                 sql << " ";
             }
 
-            sql << "FROM " << T::TABLE_NAME << " ";
+            sql << "FROM " << model->getTableName() << " ";
 
-            if (statementKeys.find(LEFT_JOIN_FOR_WHERE) != statementKeys.end()) {
-                sql << statementKeys[LEFT_JOIN_FOR_WHERE] << " ";
+            if (statementKeys.find(StatementKeys::LEFT_JOIN_FOR_WHERE) != statementKeys.end()) {
+                sql << statementKeys.at(LEFT_JOIN_FOR_WHERE) << " ";
             }
 
-            if (statementKeys.find(WHERE) != statementKeys.end()) {
-                sql << "WHERE " << statementKeys[WHERE] << " ";
+            if (statementKeys.find(StatementKeys::WHERE) != statementKeys.end()) {
+                sql << "WHERE " << statementKeys.at(WHERE) << " ";
             }
 
-            if (statementKeys.find(ORDER_BY) != statementKeys.end()) {
-                sql << "ORDER BY " << statementKeys[ORDER_BY] << " ";
+            if (statementKeys.find(StatementKeys::ORDER_BY) != statementKeys.end()) {
+                sql << "ORDER BY " << statementKeys.at(ORDER_BY) << " ";
             }
 
-            if (statementKeys.find(LIMIT) != statementKeys.end()) {
-                sql << "LIMIT " << statementKeys[LIMIT] << " ";
+            if (statementKeys.find(StatementKeys::LIMIT) != statementKeys.end()) {
+                sql << "LIMIT " << statementKeys.at(LIMIT) << " ";
             }
 
-            if (statementKeys.find(OFFSET) != statementKeys.end()) {
-                sql << "OFFSET " << statementKeys[OFFSET] << " ";
+            if (statementKeys.find(StatementKeys::OFFSET) != statementKeys.end()) {
+                sql << "OFFSET " << statementKeys.at(OFFSET) << " ";
             }
 
             sql << ";";
@@ -164,6 +174,73 @@ namespace app {
         }
 
         return result;
+    }
+
+    template<class T>
+    bool Query<T>::update(Model<T>* model, const std::map<int, std::variant<int64_t, std::string>>& set, const std::string& where) {
+        if (!this->isConnection) {
+            return false;
+        }
+
+        if (set.empty() || where.empty()) {
+            return false;
+        }
+
+        std::stringstream sql;
+
+        {
+            sql << "UPDATE " << model->getTableName() << " SET ";
+
+            size_t i = 0;
+
+            for (const auto& field : set) {
+                if (i != 0) {
+                    sql << ", ";
+                }
+
+                sql << model->getFieldName(field.first) << "=?";
+
+                i++;
+            }
+
+            sql << " WHERE " << where << ";";
+        }
+
+        sqlite3_stmt *stmt;
+
+        int responseCode = sqlite3_prepare_v2(this->db, sql.str().c_str(), -1, &stmt, nullptr);
+
+        if (responseCode != SQLITE_OK) {
+            std::cerr << "Error in sqlite3_prepare_v2: " << sqlite3_errmsg(this->db) << std::endl;
+
+            sqlite3_finalize(stmt);
+
+            return false;
+        }
+
+        {
+            size_t i = 0;
+
+            for (const auto& field : set) {
+                i++;
+
+                std::visit([&stmt, &i](auto&& value) {
+                    using V = std::decay_t<decltype(value)>;
+
+                    if constexpr (std::is_same_v<V, int64_t>) {
+                        sqlite3_bind_int64(stmt, i, value);
+                    } else if constexpr (std::is_same_v<V, std::string>) {
+                        sqlite3_bind_text(stmt, i, value.c_str(), static_cast<int>(value.size()), SQLITE_STATIC);
+                    }
+                }, field.second);
+            }
+        }
+
+        responseCode = sqlite3_step(stmt);
+
+        sqlite3_finalize(stmt);
+
+        return responseCode == SQLITE_DONE;
     }
 
     template<class T>
@@ -231,9 +308,7 @@ namespace app {
                 std::visit([&stmt, &i](auto&& value) {
                     using V = std::decay_t<decltype(value)>;
 
-                    if constexpr (std::is_same_v<V, int>) {
-                        sqlite3_bind_int(stmt, i, value);
-                    } else if constexpr (std::is_same_v<V, int64_t>) {
+                    if constexpr (std::is_same_v<V, int64_t>) {
                         sqlite3_bind_int64(stmt, i, value);
                     } else if constexpr (std::is_same_v<V, std::string>) {
                         sqlite3_bind_text(stmt, i, value.c_str(), static_cast<int>(value.size()), SQLITE_STATIC);

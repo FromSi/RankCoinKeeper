@@ -46,3 +46,4 @@ File | Settings | Build, Execution, Deployment | CMake
 * `make dev_build && ./cmake/app` - запуск без аргументов (вызовется -h --help)
 * `make dev_build && ./cmake/app -h` или `--help` - справочная информация по проекту
 * `make dev_build && ./cmake/app -u` или `--updates` - обработка новых сообщений
+* `make dev_build && ./cmake/app -mc` или `--member_counts` - получение количества пользователей в чатах

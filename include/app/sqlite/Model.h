@@ -44,14 +44,14 @@ namespace app {
          * @param field
          * @return
          */
-        int getFieldId(std::string fieldName);
+        int getFieldId(const std::string& fieldName);
 
         /**
          * @brief Получить название поля
          * @param field
          * @return
          */
-        std::string getFieldName(int fieldId);
+        std::string getFieldName(const int& fieldId);
 
         /**
          * @brief Получить данные
@@ -72,6 +72,15 @@ namespace app {
          */
         bool createOrUpdate(const std::map<int, std::variant<int64_t, std::string>>& fields);
 
+        /**
+         * @brief Обновление данных
+         * @param model
+         * @param set
+         * @param where
+         * @return
+         */
+        bool update(const std::map<int, std::variant<int64_t, std::string>>& set, const std::string& where);
+
     protected:
         /**
          * @brief экземпляр класса для запросов
@@ -88,12 +97,17 @@ namespace app {
     }
 
     template<class T>
+    bool Model<T>::update(const std::map<int, std::variant<int64_t, std::string>>& set, const std::string& where) {
+        return this->query.update(this, set, where);
+    }
+
+    template<class T>
     bool Model<T>::createOrUpdate(const std::map<int, std::variant<int64_t, std::string>>& fields) {
         return this->query.upsert(this, fields);
     }
 
     template<class T>
-    int Model<T>::getFieldId(std::string fieldName) {
+    int Model<T>::getFieldId(const std::string& fieldName) {
         const std::map<int, std::string>& fields = getFields();
 
         for (const auto& field : fields) {
@@ -106,7 +120,7 @@ namespace app {
     }
 
     template<class T>
-    std::string Model<T>::getFieldName(int fieldId) {
+    std::string Model<T>::getFieldName(const int& fieldId) {
         const std::map<int, std::string>& fields = getFields();
         auto it = fields.find(fieldId);
 
