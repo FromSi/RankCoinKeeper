@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
     } catch (const TgBot::TgException& exception) {
-        std::cout << "ErrorTG: " << exception.what();
+        std::cout << "ErrorTG: " << exception.what() << std::endl;
 
         return EXIT_FAILURE;
     }
@@ -59,9 +59,9 @@ int main(int argc, char *argv[]) {
  */
 std::string getHelp() {
     return std::string("Support arguments:\n")
-        + "\t-h --help - Information on the project"
-        + "\t-mc --member_counts - Get the number of members in chats"
-        + "\t-u --updates - Get new updates";
+        + "\t-h --help - Information on the project\n"
+        + "\t-mc --member_counts - Get the number of members in chats\n"
+        + "\t-u --updates - Get new updates\n";
 }
 
 /**
